@@ -8,7 +8,7 @@ module.exports = {
       port: process.env.DB_PORT || 5432,
       database: process.env.DB_NAME || 'nostr_relay',
       user: process.env.DB_USER || 'postgres',
-      password: process.env.DB_PASSWORD || 'postgres',
+      password: process.env.DB_PASSWORD || '<your_password_here>',
     },
     pool: {
       min: 2,

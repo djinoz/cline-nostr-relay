@@ -18,7 +18,7 @@ from pynostr.key import PrivateKey
 from pynostr.bech32 import bech32_encode, bech32_decode
 
 # Hardcoded relay address - change this to your relay's IP address
-DEFAULT_RELAY_URL = "ws://192.168.86.10:8008"  # Default to localhost:8008
+DEFAULT_RELAY_URL = "ws://<your host and port>"  # Default to localhost:8008
 
 def generate_keypair() -> Tuple[str, str]:
     """Generate a new Nostr keypair (npub, nsec)"""

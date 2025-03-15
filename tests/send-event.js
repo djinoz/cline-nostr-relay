@@ -23,7 +23,7 @@ console.log('Event created:', signedEvent);
 
 // Send to relay
 const WebSocket = require('ws');
-const ws = new WebSocket('ws://192.168.86.10:8008');
+const ws = new WebSocket('ws://<your host and port>');
 
 ws.on('open', function open() {
   console.log('Connected to relay');
