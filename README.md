@@ -63,6 +63,26 @@ Start the server in production mode:
 npm start
 ```
 
+### Logging
+
+The relay uses namespaced logging that can be controlled via the DEBUG environment variable:
+
+```
+# Show all logs
+DEBUG=* npm start
+
+# Show only event-related logs
+DEBUG=nostr:event npm start
+
+# Show multiple categories
+DEBUG=nostr:event,nostr:server npm start
+
+# Show all relay logs
+DEBUG=nostr:* npm start
+```
+
+Error logs are always displayed regardless of the DEBUG setting.
+
 ## API
 
 ### WebSocket Endpoint

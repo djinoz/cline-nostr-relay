@@ -3,6 +3,7 @@ const http = require('http');
 const express = require('express');
 const cors = require('cors');
 const eventHandler = require('./handlers/event');
+const logger = require('./utils/logger')('server');
 
 /**
  * Nostr relay server implementation
@@ -55,28 +56,28 @@ class NostrServer {
    */
   setupWebSocketServer() {
     this.wss.on('connection', (ws) => {
-      console.log('Client connected');
+      logger.log('Client connected');
 
       ws.on('message', async (message) => {
         try {
           // Log the raw message for debugging
-          console.log('Received message:', message.toString().substring(0, 200) + (message.length > 200 ? '...' : ''));
+          logger.log('Received message:', message.toString().substring(0, 200) + (message.length > 200 ? '...' : ''));
           
           let data;
           try {
             data = JSON.parse(message);
           } catch (parseError) {
-            console.error('JSON parse error:', parseError);
+            logger.error('JSON parse error:', parseError);
             return this.sendNotice(ws, 'Invalid JSON format');
           }
           
           if (!Array.isArray(data)) {
-            console.error('Invalid message format (not an array):', data);
+            logger.error('Invalid message format (not an array):', data);
             return this.sendNotice(ws, 'Invalid message format: expected array');
           }
           
           const [type, ...params] = data;
-          console.log(`Processing ${type} message with ${params.length} parameters`);
+          logger.log(`Processing ${type} message with ${params.length} parameters`);
           
           switch (type) {
             case 'EVENT':
@@ -92,22 +93,22 @@ class NostrServer {
               break;
             
             default:
-              console.warn(`Unknown message type: ${type}`);
+              logger.log(`Unknown message type: ${type}`);
               this.sendNotice(ws, `Unknown message type: ${type}`);
           }
         } catch (error) {
-          console.error('Error processing message:', error);
+          logger.error('Error processing message:', error);
           this.sendNotice(ws, 'Error processing message: ' + (error.message || 'Unknown error'));
         }
       });
 
       ws.on('close', () => {
-        console.log('Client disconnected');
+        logger.log('Client disconnected');
         eventHandler.removeClientSubscriptions(ws);
       });
 
       ws.on('error', (error) => {
-        console.error('WebSocket error:', error);
+        logger.error('WebSocket error:', error);
       });
     });
   }
@@ -189,7 +190,7 @@ class NostrServer {
   start() {
     return new Promise((resolve) => {
       this.server.listen(this.port, () => {
-        console.log(`Nostr relay server listening on port ${this.port}`);
+        logger.log(`Nostr relay server listening on port ${this.port}`);
         resolve();
       });
     });

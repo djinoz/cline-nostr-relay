@@ -1,6 +1,7 @@
 const eventRepository = require('../db/repository');
 const eventValidator = require('../utils/event-validator');
 const filterMatcher = require('../utils/filters');
+const logger = require('../utils/logger')('event');
 
 /**
  * Handler for processing Nostr events
@@ -44,7 +45,7 @@ class EventHandler {
         event_id: eventId 
       };
     } catch (error) {
-      console.error('Error handling event:', error);
+      logger.error('Error handling event:', error);
       return { 
         success: false, 
         message: 'Error processing event', 
@@ -99,7 +100,7 @@ class EventHandler {
         event_id: event.id 
       };
     } catch (error) {
-      console.error('Error handling deletion:', error);
+      logger.error('Error handling deletion:', error);
       return { 
         success: false, 
         message: 'Error processing deletion', 
@@ -148,7 +149,7 @@ class EventHandler {
         try {
           client.send(JSON.stringify(['EVENT', subscriptionId, event]));
         } catch (error) {
-          console.error(`Error broadcasting event to subscription ${subscriptionId}:`, error);
+          logger.error(`Error broadcasting event to subscription ${subscriptionId}:`, error);
         }
       }
     }
@@ -167,12 +168,12 @@ class EventHandler {
 
       try {
         // Log the filters for debugging
-        console.log(`Processing subscription ${subscriptionId} with filters:`, JSON.stringify(filters));
+        logger.log(`Processing subscription ${subscriptionId} with filters:`, JSON.stringify(filters));
         
         // Send matching events from the database
         const events = await eventRepository.findEvents(filters);
         
-        console.log(`Found ${events.length} events for subscription ${subscriptionId}`);
+        logger.log(`Found ${events.length} events for subscription ${subscriptionId}`);
         
         for (const event of events) {
           if (client.readyState === client.OPEN) {
@@ -187,13 +188,13 @@ class EventHandler {
         
         return { success: true };
       } catch (error) {
-        console.error(`Error handling subscription ${subscriptionId}:`, error);
+        logger.error(`Error handling subscription ${subscriptionId}:`, error);
         // Remove the subscription if there was an error
         this.removeSubscription(subscriptionId);
         return { success: false, message: 'Error processing subscription' };
       }
     } catch (error) {
-      console.error(`Error setting up subscription ${subscriptionId}:`, error);
+      logger.error(`Error setting up subscription ${subscriptionId}:`, error);
       return { success: false, message: 'Error setting up subscription' };
     }
   }

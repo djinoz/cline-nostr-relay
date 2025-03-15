@@ -1,4 +1,5 @@
 const db = require('./knex');
+const logger = require('../utils/logger')('db');
 
 /**
  * Repository for handling Nostr event database operations
@@ -20,6 +21,7 @@ class EventRepository {
         content: event.content,
         sig: event.sig
       });
+      logger.log('Event saved:', event.id);
       return event.id;
     } catch (error) {
       // If it's a duplicate key error, just return the event ID
@@ -101,9 +103,11 @@ class EventRepository {
       const flattenedEvents = events.flat();
       const uniqueEvents = [...new Map(flattenedEvents.map(event => [event.event_id, event])).values()];
       
-      return uniqueEvents.map(this._formatEvent);
+      const formattedEvents = uniqueEvents.map(this._formatEvent);
+      logger.log(`Found ${formattedEvents.length} events matching filters`);
+      return formattedEvents;
     } catch (error) {
-      console.error('Error finding events:', error);
+      logger.error('Error finding events:', error);
       throw error;
     }
   }
@@ -120,9 +124,11 @@ class EventRepository {
         .where({ event_id: eventId, pubkey })
         .update({ deleted: true });
       
-      return updated > 0;
+      const success = updated > 0;
+      logger.log(`Marked event ${eventId} as deleted: ${success}`);
+      return success;
     } catch (error) {
-      console.error('Error marking event as deleted:', error);
+      logger.error('Error marking event as deleted:', error);
       throw error;
     }
   }
